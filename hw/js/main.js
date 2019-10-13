@@ -135,6 +135,7 @@ function updateVisualization() {
 	var t = d3.transition().duration(800);
 
 	let selector = d3.select("#ranking-type").property("value");
+	console.log("selector..." + selector)
 	let timeFrom = d3.select("#time-period-from").property("value")
 	let timeTo = d3.select("#time-period-to").property("value")
 
@@ -167,22 +168,28 @@ function updateVisualization() {
 
 	pointsGroup.exit().remove()
 
+	var tip = d3.tip()
+		.attr("class", "d3-tip")
+		.offset([-10,0])
+		.html(function(d) {
+			let selector = d3.select("#ranking-type").property("value")
+			// return `${d[selector]}`
+			return `<span class="tooltip-title">${d.LOCATION} ${formatDate(d.YEAR)}:</span> ${d[selector]}`;
+		});
+	// .html(function(d) { return `<span class="tooltip-title">${d.LOCATION} ${formatDate(d.YEAR)}:</span> ${d[selector]}`; });
+
+	// var tip = d3.tip()
+	//     .attr('class', 'd3-tip')
+	//     .offset([-10,0])
+	//     .html(function(d) { return "hello"; });
+
+
 	svg.select(".x-axis").transition(t)
 		.call(xAxis)
 	svg.select(".y-axis").transition(t)
 		.call(yAxis)
 
-	// var tip = d3.tip()
-	// 	.attr('class', 'd3-tip')
-	// 	.offset([-10,0])
-	// 	.html(function(d) { return `<span class="tooltip-title">${d.LOCATION} ${formatDate(d.YEAR)}:</span> ${d[selector]}`; });
-
-	/*var tip = d3.tip()
-        .attr('class', 'd3-tip')
-        .offset([-10,0])
-        .html(function(d) { return "hello"; });
-
-    svg.call(tip);*/
+	svg.call(tip);
 
 	pointsGroup.enter()
 		.append("circle")
@@ -191,14 +198,14 @@ function updateVisualization() {
 		.attr("cy", d => yScale(d[selector]))
 		.attr("class", "tooltip-circle")
 		.on("mouseover", function(d) {
-			/*tip.show(d)*/
+			tip.show(d)
 			hoverEffectOn(this)
 		})
 		.on("mouseout", function(d) {
-			/*tip.hide(d)*/
+			tip.hide(d)
 			hoverEffectOff(this)
 		})
-		// .on("click", function(d) { console.log("clicked!");showEdition(d) })
+		.on("click", function(d) { console.log("clicked!");showEdition(d) })
 		.merge(pointsGroup)
 		.transition(t)
 		.attr("cx", d => xScale(d.YEAR))
