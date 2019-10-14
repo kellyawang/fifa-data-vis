@@ -1,17 +1,22 @@
+// Jumbotron
+var jumboHeight = $('.jumbotron').outerHeight();
+function parallax(){
+	var scrolled = $(window).scrollTop();
+	$('.bg').css('height', (jumboHeight - scrolled) + 'px');
+}
+
+$(window).scroll(function(e){
+	parallax();
+});
 
 // SVG drawing area
-
 var margin = {top: 40, right: 40, bottom: 60, left: 60};
 
 var width = 700 - margin.left - margin.right,
 	height = 500 - margin.top - margin.bottom;
 
 var scale_padding = 30
-
-//Create scale functions
-// var xScale = d3.scaleBand()
-// 	.rangeRound([scale_padding, width - scale_padding])
-// 	.paddingInner(0.1);
+var axis_margin = 15
 
 var xScale = d3.scaleTime()
 	.range([scale_padding, width - scale_padding]);
@@ -27,7 +32,6 @@ var yAxis = d3.axisLeft(yScale)
 var formatDate = d3.timeFormat("%Y");
 var parseDate = d3.timeParse("%Y");
 
-// $("#time-filter-form").submit(function(e) { updateVisualization() })
 
 // Draw initial svgs
 setup();
@@ -39,10 +43,21 @@ loadData();
 var data;
 
 var lineGenerator = d3.line()
-	.curve(d3.curveMonotoneX) //curveNatural, curveBasis, curveMonotoneX
+	.curve(d3.curveMonotoneX)
 	.x(function(d) { return xScale(d.YEAR); })
 	.y(function(d) { return yScale(d.GOALS); });
 
+var labelMap = {
+	EDITION: "Edition",
+	YEAR: "Year",
+	LOCATION: "Location",
+	WINNER: "Winner",
+	TEAMS: "Teams",
+	MATCHES: "Matches",
+	GOALS: "Goals",
+	AVERAGE_GOALS: "Average Goals",
+	AVERAGE_ATTENDANCE: "Average Attendance"
+}
 
 //create svgs
 function setup() {
@@ -58,11 +73,6 @@ function setup() {
 	svg.append("g").attr("id", "point-group")
 	svg.append("g").attr("id", "x-axis-group")
 	svg.append("g").attr("id", "y-axis-group")
-
-	svg.append("g").attr("class", "focus")
-		.style("display", "none");
-	//Set form listener
-//	d3.select(".time-form-submit").on("submit", (d, i) => { testSubmit() });
 
 }
 
@@ -100,6 +110,21 @@ function loadData() {
 		yAxisGroup.attr("class", "axis y-axis")
 			.call(yAxis);
 
+		// Label the axes
+		d3.select("#chart-svg").append("text")
+			.attr("class", "x-axis axis-label")
+			.attr("x", width - scale_padding - 5)
+			.attr("y", height - axis_margin)
+			.text(labelMap.YEAR)
+
+		d3.select("#chart-svg").append("text")
+			.attr("class", "y-axis axis-label")
+			.style("text-anchor", "end")
+			.attr("transform", `rotate(270, ${axis_margin}, ${height/2})`)
+			.attr("x", width/4 + scale_padding)
+			.attr("y", width/3 + 5)
+			.text(labelMap.GOALS)
+
 		drawLine();
 
 		// Draw the visualization for the first time
@@ -114,28 +139,11 @@ function drawLine() {
 		.attr("d", lineGenerator)
 }
 
-function testSubmit() {
-	console.log("testing submit button")
-	let timeFrom = d3.select("#time-period-from").property("value");
-	let timeTo = d3.select("#time-period-to").property("value");
-	console.log("testSubmit timeFrom:" + timeFrom + ". timeTo:" + timeTo + ".")
-
-	let filteredData = data.filter(function(d) {
-		console.log(formatDate(d.YEAR))
-		if (formatDate(d.YEAR) >= timeFrom && formatDate(d.YEAR) <= timeTo) {
-			console.log("Year that passed the test:" + formatDate(d.YEAR) + ".")
-		}
-		return formatDate(d.YEAR) >= timeFrom && formatDate(d.YEAR) <= timeTo
-	})
-	console.log(filteredData)
-}
-
 // Render visualization
 function updateVisualization() {
 	var t = d3.transition().duration(800);
 
 	let selector = d3.select("#ranking-type").property("value");
-	console.log("selector..." + selector)
 	let timeFrom = d3.select("#time-period-from").property("value")
 	let timeTo = d3.select("#time-period-to").property("value")
 
@@ -161,7 +169,6 @@ function updateVisualization() {
 		.attr("d", lineGenerator)
 
 	var svg = d3.select("#chart-svg")
-	// var focus = svg.select(".focus")
 	let pointsGroup = d3.select("#point-group")
 		.selectAll("circle")
 		.data(filteredData)
@@ -173,21 +180,26 @@ function updateVisualization() {
 		.offset([-10,0])
 		.html(function(d) {
 			let selector = d3.select("#ranking-type").property("value")
-			// return `${d[selector]}`
 			return `<span class="tooltip-title">${d.LOCATION} ${formatDate(d.YEAR)}:</span> ${d[selector]}`;
 		});
-	// .html(function(d) { return `<span class="tooltip-title">${d.LOCATION} ${formatDate(d.YEAR)}:</span> ${d[selector]}`; });
 
-	// var tip = d3.tip()
-	//     .attr('class', 'd3-tip')
-	//     .offset([-10,0])
-	//     .html(function(d) { return "hello"; });
-
-
+	// draw axes
 	svg.select(".x-axis").transition(t)
 		.call(xAxis)
 	svg.select(".y-axis").transition(t)
 		.call(yAxis)
+
+	// update axis label
+	var ylabel = svg.select(".y-axis.axis-label")
+	ylabel.exit().remove()
+
+	ylabel.enter()
+		.append("text")
+		// .attr("class", "y-axis axis-label")
+		// .style("text-anchor", "middle")
+		.merge(ylabel)
+		.transition(t)
+		.text(labelMap[selector])
 
 	svg.call(tip);
 
@@ -211,10 +223,7 @@ function updateVisualization() {
 		.attr("cx", d => xScale(d.YEAR))
 		.attr("cy", d => yScale(d[selector]))
 
-	// appendTooltips(focus)
 }
-
-// .on("mousemove", mousemove(xScale, yScale, selector, focus))
 
 // Show details for a specific FIFA World Cup
 function showEdition(d){
@@ -222,12 +231,11 @@ function showEdition(d){
 	// select container elements
 	var $detailsContainer = $("#detail-area");
 
-	// build image and header elements
-	// var $img = $('<img>').attr('src', `data/img/${d.image}`).attr('alt', "");
+	// build header elements
 	var header = `<h3>${d.EDITION}</h3>`
 
 	// build a table to hold detailed info
-	var $table = $('<table>');
+	var $table = $('<table class="mx-auto">');
 	var $tbody = $table.append('<tbody />').children('tbody');
 	$tbody.append('<tr />').children('tr:last')
 		.append("<td>Winner</td>")
@@ -263,7 +271,7 @@ function hoverEffectOn(object) {
 	d3.select(object)
 		.transition()
 		.duration(100)
-		.style("fill", "green");
+		.style("fill", "#4541ff");
 }
 
 function hoverEffectOff(object) {

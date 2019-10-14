@@ -1,11 +1,50 @@
 
 /* ADD YOUR STYLES HERE */
+.bg {
+  /*Source: https://www.desktopbackground.org/wallpaper/fifa-world-cup-2018-stadiums-hd-wallpapers-hd-wallpapers-inx-169468*/
+  background: url('../data/fifabg2.jpg') no-repeat center center;
+  position: fixed;
+  width: 100%;
+  height: 75vh; /*same height as jumbotron */
+  top:0;
+  left:0;
+  z-index: -1;
+}
+.jumbotron {
+  height: 75vh;
+  color: white;
+  text-shadow: #444 0 1px 1px;
+  background:transparent;
+}
+
+
+body {
+  font-family: 'Roboto Slab', serif;
+  backgroud-color: navy;
+}
+
+.container {
+  margin-top: 40px;
+  margin-bottom: 15vh;
+}
+
+svg {
+  padding: 20px;
+}
+
+.container input, .container select {
+  margin: 0px 10px;
+}
+
+.form-inline {
+  padding: 40px 0px;
+}
 
 text.x-axis.axis-label,
 text.y-axis.axis-label {
   text-anchor: end;
   font-style: italic;
-  color: rgb(238,238,238)
+  color: rgb(238, 238, 238)
 }
 
 text.y2, text.y3 {
@@ -18,9 +57,27 @@ text.value {
   font-style: italic;
 }
 
-/*#detail-area {*/
-/*  background-color: #EEEEEE;*/
-/*}*/
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+tbody > tr:nth-of-type(even) {
+  background-color: #f6fbb1;
+}
+
+td, th {
+  padding: 5px 10px;
+
+}
+
+div#chart-area, div#detail-area {
+  padding: 10px;
+  border: 1px solid #ced4da;
+  border-radius: 5px;
+  text-align: center;
+  box-shadow: 0px 0px 10px 10px #f6fbb1;
+}
 
 /****************/
 /*  LINE CHART  */
@@ -38,7 +95,8 @@ text.value {
 
 .line {
   fill: none;
-  stroke: #1C9A3D;
+  /*stroke: #1C9A3D;*/
+  stroke: #4541ff;
   stroke-width: 1.5px;
 }
 
@@ -46,7 +104,8 @@ text.value {
   /*fill: #96AB96;*/
   fill-opacity: 1.0;
   fill: white;
-  stroke: green;
+  stroke: #4541ff;
+  /*stroke: green;*/
 }
 
 
